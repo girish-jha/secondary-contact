@@ -3,6 +3,8 @@ import Dexie, { Table } from 'dexie';
 export interface TContact {
     id?: number;
     name: string;
+    jobTitle: string;
+    isFavorite?: boolean
     phones?: string;
     email?: string;
     notes?: string;
@@ -16,7 +18,7 @@ export class ContactsDb extends Dexie {
     constructor() {
         super('ContactDb');
         this.version(1).stores({
-            contacts: '++id, name, phones, email, notes' // Primary key and indexed props
+            contacts: '++id, name,jobTitle,isFavorite, phones, email, notes' // Primary key and indexed props
         });
     }
 }

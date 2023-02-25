@@ -1,9 +1,13 @@
-import { ButtonGroup, Col, Grid, IconButton, Panel, Row, Stack } from "rsuite";
-import TrashIcon from '@rsuite/icons/Trash';
-import EditIcon from '@rsuite/icons/Edit';
-import UserInfoIcon from '@rsuite/icons/UserInfo';
+import { Stack, Avatar, CardContent, Typography, CardHeader, IconButton, CardActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { contacts, TContact } from "../db";
+import PhoneIcon from '@mui/icons-material/Phone';
+import AlternateEmailIcon from '@mui/icons-material/Email';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import NotesIcon from '@mui/icons-material/Notes';
+import { red } from '@mui/material/colors';
+import { Favorite, Share } from '@mui/icons-material';
 
 type ContactCardProps = {
     contact: TContact
@@ -11,83 +15,97 @@ type ContactCardProps = {
 
 
 export const ContactCard = (props: ContactCardProps) => {
+    const navigate = useNavigate();
+    const { id, name, email, phones, notes, isFavorite, jobTitle } = props.contact;
+    const setFavorite = async () => {
+        await contacts.update(props.contact, { isFavorite: !isFavorite })
+    }
+
+    const editContact = () => {
+        navigate(`/edit/${id}`)
+    }
+
+    const deleteContact = async () => {
+        if (id)
+            await contacts.delete(id);
+    }
+
     return (
         <>
-            <Row key={`${props.contact.id}-row`}>
-                <Col key={`${props.contact.id}-col`} md={6} sm={6} xs={24}>
-                    <Card key={`${props.contact.id}-card`} contact={props.contact} />
-                </Col>
-            </Row>
+            <CardHeader
+                avatar={
+                    <Avatar {...stringAvatar(name)} />
+                }
+                action={
+                    <>
+                        <IconButton aria-label="Edit" onClick={editContact}>
+                            <EditIcon />
+                        </IconButton>
+                        <IconButton aria-label="Delete" onClick={deleteContact}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </>
+                }
+                title={name}
+                subheader={jobTitle}
+            />
+            <CardContent>
+                <Typography align='justify' variant="body2" color="text.secondary" component="div" >
+                    <IconButton href={`tel:${phones}`}><PhoneIcon />{phones}</IconButton>
+
+                </Typography>
+                {email && <Typography align='justify' variant="body2" color="text.secondary" component="div">
+                    <IconButton href={`mailto:${email}`}><AlternateEmailIcon />{email}</IconButton>
+                </Typography>}
+                {notes && <Typography align='justify' variant="body2" color="text.secondary" component="div">
+                    {notes}
+                </Typography>}
+            </CardContent>
+            <CardActions disableSpacing>
+                <IconButton aria-label="add to favorites" onClick={setFavorite}>
+                    <Favorite color={isFavorite ? 'primary' : 'action'} />
+                </IconButton>
+                <IconButton aria-label="share">
+                    <Share />
+                </IconButton>
+
+            </CardActions>
+
+            {/* <div>{name}</div>
+            <div>{phones}</div>
+            <div>{email}</div>
+            <div>{notes}</div> */}
+
         </>
     )
 }
 
-type CardProps = {
-    contact: TContact
-}
-const Card = (props: CardProps) => {
-    const { contact } = props;
-    const navigate = useNavigate();
-    const detailsClicked = () => {
-        navigate("/details/" + contact.id);
-    }
-    const editClicked = () => {
-        navigate("/edit/" + contact.id);
 
-    }
-    const deleteClicked = async () => {
-        if (contact.id)
-            await contacts.delete(contact.id)
+function stringToColor(string: string) {
+    let hash = 0;
+    let i;
 
+    /* eslint-disable no-bitwise */
+    for (i = 0; i < string.length; i += 1) {
+        hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
 
+    let color = '#';
 
-    return (
-        <Panel key={`${contact.id}-panel`}
-            bordered
-            shaded
-            header={
-                <Stack justifyContent="space-between">
-                    <span>{contact.name}</span>
-                    <ButtonGroup >
-                        <IconButton style={{ padding: "27px 12px 8px 48px" }} onClick={detailsClicked}><UserInfoIcon /></IconButton>
-                        <IconButton style={{ padding: "27px 12px 8px 48px" }} onClick={editClicked}><EditIcon /></IconButton>
-                        <IconButton style={{ padding: "27px 12px 8px 48px" }} onClick={deleteClicked}><TrashIcon /></IconButton>
-                    </ButtonGroup>
-                </Stack>
-            }
-        >
+    for (i = 0; i < 3; i += 1) {
+        const value = (hash >> (i * 8)) & 0xff;
+        color += `00${value.toString(16)}`.slice(-2);
+    }
+    /* eslint-enable no-bitwise */
 
-            <Grid>
-                <Row>
-                    <Col><a href={`tel:+91${contact.phones}`}>{contact.phones}</a> </Col>
-                </Row>
-                <Row>
-                    <Col><a href={`mailto:${contact.email}`}>{contact.email}</a> </Col>
-                </Row>
-                <Row>
-                    <Col>{contact.notes}</Col>
-                </Row>
-            </Grid>
-        </Panel>
-    );
+    return color;
 }
 
-// const ExtendedContacts = (<Grid>
-//     {
-//         contact.phone?.map(p => (
-//             <Row key={`${p}-row`}>
-//                 <Col style={{ paddingBottom: "1rem" }}><a href={`tel:+91${p}`}>{p}</a></Col>
-//             </Row>))
-//     }
-//     {
-//         contact.email?.map(p => (
-//             <Row key={`${p}-row`}>
-//                 <Col>{p}</Col>
-//             </Row>))
-//     }
-//     {contact.notes &&
-//         <Row>
-//             <Col>{contact.notes}</Col>
-//         </Row>}
-// </Grid>) 
+function stringAvatar(name: string) {
+    return {
+        sx: {
+            bgcolor: stringToColor(name),
+        },
+        children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+    };
+}
