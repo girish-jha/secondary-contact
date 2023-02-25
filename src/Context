@@ -1,0 +1,11 @@
+import React from "react";
+import { ContactActions, initialState, TAppState } from './reducer';
+
+export type TContext = { state: TAppState; dispatch: React.Dispatch<ContactActions>; }
+
+export const ContactContext = React.createContext<TContext>(
+    {
+        state: initialState,
+        dispatch: () => undefined,
+    }
+);
