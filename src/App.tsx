@@ -5,25 +5,46 @@ import { Edit } from './pages/Edit';
 import { Details } from './pages/Details';
 import { useLiveQuery } from "dexie-react-hooks";
 import { contacts } from './db';
-import { Index } from './pages/Index';
-
+// import { Index } from './pages/Index';
+import { BottomNavigation, BottomNavigationAction, Box, Container } from '@mui/material';
+import { Restore, Favorite, LocationOn, ContactPhoneSharp, Add } from '@mui/icons-material'
+import { useState } from 'react';
+import { Footer } from './components/Footer';
+import { Header } from './components/Header';
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
+const darkTheme = createTheme({ palette: { mode: 'dark' } });
+const lightTheme = createTheme({ palette: { mode: 'light' } });
 
 function App() {
-  const allItems = useLiveQuery(() => contacts.toArray(), []);
-  console.log("🚀 ~ file: App.tsx:20 ~ App ~ allItems:", allItems)
 
   return (
     <div className="App">
+      <ThemeProvider theme={lightTheme}>
+        <Header />
+        <Container maxWidth="sm" sx={{ paddingTop: "2rem" }} >
+          <Box
+            sx={{
+              mb: 2,
+              display: "flex",
+              flexDirection: "column",
+              height: 700,
+              overflow: "hidden",
+              overflowY: "scroll",
+            }}
+          >
+            <BrowserRouter>
+              <Routes>
+                <Route element={<Home />} path="/" />
+                <Route element={<Edit />} path="/edit/:id?" />
+                <Route element={<Details />} path="/details/:id?" />
+              </Routes>
+              <Footer />
+            </BrowserRouter>
+          </Box>
+        </Container>
+      </ThemeProvider>
 
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Home />} path="/" />
-          <Route element={<Edit />} path="/edit/:id?" />
-          <Route element={<Details />} path="/details/:id?" />
-        </Routes>
-      </BrowserRouter>
-
-    </div>
+    </div >
   );
 }
 

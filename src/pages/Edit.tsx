@@ -1,25 +1,15 @@
-import { Container, Header, Content, ButtonToolbar, Button, Input, Schema } from "rsuite"
 import { ContactList } from "../components/ContactList"
-import { ContactHeader } from "../components/Header"
-import { Form } from 'rsuite';
-import React, { FormEvent } from "react";
-import { NumberType } from "schema-typed";
+import React, { FormEvent, MouseEventHandler } from "react";
 import { useState, useEffect } from 'react';
 import { TContact, db, contacts } from '../db';
 import { useParams } from "react-router";
+import { useForm } from "material-ui-react-form";
+import { Box, Button, Grid, Paper, Stack, styled, TextField } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 
 type EditProps = {
 
 }
-
-const { StringType } = Schema.Types;
-const model = Schema.Model({
-    name: StringType().isRequired('Name is required.'),
-    email: StringType().isEmail('Please enter a valid email address.'),
-    phone: NumberType().pattern(/\d{10}/, 'Please enter a valid email address.'),
-    notes: StringType()
-
-});
 
 const emptyForm = {
     name: '',
@@ -31,73 +21,41 @@ const emptyForm = {
 export const Edit = (props: EditProps) => {
 
     const { id } = useParams();
-    const [formValue, setFormValue] = useState<Record<string, string>>(emptyForm);
+    const navigate = useNavigate()
+    const [fields, form] = useForm({
+        name: { test: "required", message: "Name is required" },
+        jobTitle: {},
+        email: { test: ["email"], message: "Enter valid email" },
+        phones: { test: /(^((0)|\+91)?[1-9][0-9]{9}$)|(^$)/, message: "Enter valid phone" },
+        notes: {},
+    });
 
-    useEffect(() => {
-        if (id)
-            contacts.get(Number(id)).then(res => {
-                console.log('contact fetrched', id, res)
-                if (res)
-                    setFormValue({
-                        name: res.name,
-                        email: res.email ?? '',
-                        phone: res.phones ?? '',
-                        notes: res.notes ?? ''
-                    })
-            })
-    }, [id])
-
-
-
-    const onSubmit = async (status: boolean, e: FormEvent) => {
+    const onSubmit: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
         e.preventDefault()
+        const values = form.validate();
+        if (!values)
+            return;
 
         const contactItem: TContact = {
-            name: formValue.name,
-            email: formValue.email,
-            phones: formValue.phone,
-            notes: formValue.notes
+            name: values.name as string,
+            email: values.email as string,
+            jobTitle: values.jobTitle as string,
+            phones: values.phones as string,
+            notes: values.notes as string
         };
         await contacts.add(contactItem);
-        setFormValue(emptyForm);
-    }
+        form.setValues({});
+        navigate("/")
 
+    }
     return (
-        <>
-            <Container >
-                <Header style={{ height: "4rem", paddingTop: "1rem" }}>
-                    <ContactHeader />
-                </Header>
-                <Content>
-                    <Form fluid model={model} formValue={formValue} onChange={setFormValue} onSubmit={onSubmit}>
-                        <Form.Group controlId="name">
-                            <Form.ControlLabel>Name</Form.ControlLabel>
-                            <Form.Control name="name" />
-                            <Form.HelpText>Name is required</Form.HelpText>
-                        </Form.Group>
-                        <Form.Group controlId="email">
-                            <Form.ControlLabel>Email</Form.ControlLabel>
-                            <Form.Control name="email" type="email" />
-                        </Form.Group>
-                        <Form.Group controlId="phone">
-                            <Form.ControlLabel>Phone</Form.ControlLabel>
-                            <Form.Control name="phone" type="tel" autoComplete="off" />
-                        </Form.Group>
-                        <Form.Group controlId="notes">
-                            <Form.ControlLabel>Notes</Form.ControlLabel>
-                            <Form.Control name="notes" accepter={Textarea} />
-                        </Form.Group>
-                        <Form.Group>
-                            <ButtonToolbar>
-                                <Button type="submit" appearance="primary">Submit</Button>
-                                <Button appearance="default">Cancel</Button>
-                            </ButtonToolbar>
-                        </Form.Group>
-                    </Form>
-                </Content>
-            </Container>
-        </>
+        <Stack spacing={2}>
+            <TextField {...fields.name} placeholder="Contact Name" fullWidth type="text" />
+            <TextField {...fields.jobTitle} placeholder="Job Title" fullWidth type="text" />
+            <TextField {...fields.phones} placeholder="Phone" fullWidth type="tel" />
+            <TextField {...fields.email} placeholder="Email" fullWidth type="email" />
+            <TextField placeholder="Notes" multiline rows={4} fullWidth type="text" />
+            <Button onClick={onSubmit}>Save</Button>
+        </Stack>
     )
 }
-
-const Textarea = React.forwardRef((props, ref) => <Input {...props} as="textarea" rows={5} />);

@@ -1,6 +1,4 @@
-import { Container, Content, Header, Footer } from 'rsuite';
 import { ContactList } from "../components/ContactList"
-import { ContactHeader } from "../components/Header"
 import { v4 as uuidv4 } from 'uuid';
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -15,7 +13,6 @@ export const Home = (props: HomeProps) => {
 
     const allItems = useLiveQuery(() => contacts.orderBy('name').toArray(), []);
     const [contactList, setContactList] = useState(allItems);
-    console.log("🚀 ~ file: Home.tsx:16 ~ Home ~ contactList:", contactList)
 
     useEffect(() => {
         setContactList(allItems)
@@ -31,14 +28,7 @@ export const Home = (props: HomeProps) => {
     }
     return (
         <>
-            <Container >
-                <Header style={{ height: "4rem", paddingTop: "1rem" }}>
-                    <ContactHeader onSearch={onSearch} />
-                </Header>
-                <Content>
-                    {contactList ? <ContactList contactList={contactList} /> : <div>No contacts Found</div>}
-                </Content>
-            </Container>
+            {contactList ? <ContactList contactList={contactList} /> : <div>No contacts Found</div>}
 
         </>
     )
