@@ -7,12 +7,11 @@
 // code you'd like.
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
-
 import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -81,35 +80,38 @@ self.addEventListener('message', (event) => {
 const CACHE_NAME = "offline";
 const OFFLINE_URL = "/index.html"
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      // Setting {cache: 'reload'} in the new request ensures that the
-      // response isn't fulfilled from the HTTP cache; i.e., it will be
-      // from the network.
-      await cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
-    })()
-  );
-  // Force the waiting service worker to become the active service worker.
-  self.skipWaiting();
-});
+// self.addEventListener("install", (event) => {
+//   event.waitUntil(
+//     (async () => {
+//       const cache = await caches.open(CACHE_NAME);
+//       // Setting {cache: 'reload'} in the new request ensures that the
+//       // response isn't fulfilled from the HTTP cache; i.e., it will be
+//       // from the network.
+//       await cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
+//     })()
+//   );
+//   // Force the waiting service worker to become the active service worker.
+//   self.skipWaiting();
+// });
 
-self.addEventListener('activate', event => {
-  // Remove old caches
-  event.waitUntil(
-    (async () => {
-      const keys = await caches.keys();
-      return keys.map(async (cache) => {
-        if (cache !== CACHE_NAME) {
-          console.log('Service Worker: Removing old cache: ' + cache);
-          return await caches.delete(cache);
-        }
-      })
-    })()
-  )
-})
+// self.addEventListener('activate', event => {
+//   // Remove old caches
+//   event.waitUntil(
+//     (async () => {
+//       const keys = await caches.keys();
+//       return keys.map(async (cache) => {
+//         if (cache !== CACHE_NAME) {
+//           console.log('Service Worker: Removing old cache: ' + cache);
+//           return await caches.delete(cache);
+//         }
+//       })
+//     })()
+//   )
+// })
 
-
+registerRoute(({ request }) => { request.destination == 'script' }, new NetworkFirst())
+registerRoute(({ request }) => { request.destination == 'font' }, new NetworkFirst())
+registerRoute(({ request }) => { request.destination == 'document' }, new NetworkFirst())
+registerRoute(({ request }) => { request.destination == 'style' }, new NetworkFirst())
 
 // Any other custom service worker logic can go here.
