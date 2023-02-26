@@ -95,6 +95,20 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
+self.addEventListener('activate', event => {
+  // Remove old caches
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      return keys.map(async (cache) => {
+        if (cache !== CACHE_NAME) {
+          console.log('Service Worker: Removing old cache: ' + cache);
+          return await caches.delete(cache);
+        }
+      })
+    })()
+  )
+})
 
 
 

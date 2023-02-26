@@ -1,17 +1,14 @@
 import { Stack, Avatar, CardContent, Typography, CardHeader, IconButton, CardActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { contacts, TContact } from "../db";
-import PhoneIcon from '@mui/icons-material/Phone';
-import AlternateEmailIcon from '@mui/icons-material/Email';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import NotesIcon from '@mui/icons-material/Notes';
+import { Phone, Email, Edit, Delete, Note, Favorite, Share, WhatsApp } from '@mui/icons-material';
 import { red } from '@mui/material/colors';
-import { Favorite, Share } from '@mui/icons-material';
+import VCard from 'vcard-creator'
 
 type ContactCardProps = {
     contact: TContact
 }
+
 
 
 export const ContactCard = (props: ContactCardProps) => {
@@ -21,6 +18,39 @@ export const ContactCard = (props: ContactCardProps) => {
         await contacts.update(props.contact, { isFavorite: !isFavorite })
     }
 
+    const shareContact = () => {
+        if (!navigator.canShare) {
+            console.log(`Your browser doesn't support the Web Share API.`)
+            return
+        }
+        const vcard = new VCard();
+        vcard.addName(name)
+            .addJobtitle(jobTitle ?? '')
+            .addPhoneNumber(phones ?? '', 'HOME')
+            .addEmail(email ?? '', 'HOME')
+            .addNote(notes ?? '');
+
+        const data = {
+            files: [
+                new File([vcard.toString()], 'image.vcf', {
+                    type: 'vcard',
+                }),
+            ],
+            title: name,
+            text: vcard.toString(),
+        };
+        console.log(vcard.toString(), navigator.share)
+        if (navigator.share) {
+            navigator
+                .share(data)
+                .then(() => {
+                    console.log('Successfully shared');
+                })
+                .catch(error => {
+                    console.error('Something went wrong sharing the blog', error);
+                });
+        }
+    };
     const editContact = () => {
         navigate(`/edit/${id}`)
     }
@@ -39,10 +69,10 @@ export const ContactCard = (props: ContactCardProps) => {
                 action={
                     <>
                         <IconButton aria-label="Edit" onClick={editContact}>
-                            <EditIcon />
+                            <Edit />
                         </IconButton>
                         <IconButton aria-label="Delete" onClick={deleteContact}>
-                            <DeleteIcon />
+                            <Delete />
                         </IconButton>
                     </>
                 }
@@ -51,11 +81,12 @@ export const ContactCard = (props: ContactCardProps) => {
             />
             <CardContent>
                 <Typography align='justify' variant="body2" color="text.secondary" component="div" >
-                    <IconButton href={`tel:${phones}`}><PhoneIcon />{phones}</IconButton>
+                    {phones}<IconButton href={`tel:${phones}`}><Phone /></IconButton>
+                    <IconButton href={`https://wa.me/${phones}`}><WhatsApp /></IconButton>
 
                 </Typography>
                 {email && <Typography align='justify' variant="body2" color="text.secondary" component="div">
-                    <IconButton href={`mailto:${email}`}><AlternateEmailIcon />{email}</IconButton>
+                    {email} <IconButton href={`mailto:${email}`}><Email /></IconButton>
                 </Typography>}
                 {notes && <Typography align='justify' variant="body2" color="text.secondary" component="div">
                     {notes}
@@ -65,7 +96,7 @@ export const ContactCard = (props: ContactCardProps) => {
                 <IconButton aria-label="add to favorites" onClick={setFavorite}>
                     <Favorite color={isFavorite ? 'primary' : 'action'} />
                 </IconButton>
-                <IconButton aria-label="share">
+                <IconButton aria-label="share" onClick={shareContact}>
                     <Share />
                 </IconButton>
 
@@ -102,10 +133,13 @@ function stringToColor(string: string) {
 }
 
 function stringAvatar(name: string) {
+    const nameArray = name.split(' ');
+    const fNameFirstChar = nameArray[0][0]
+    const lNameFirstChar = nameArray[1]?.[0]
     return {
         sx: {
             bgcolor: stringToColor(name),
         },
-        children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+        children: `${fNameFirstChar ?? ''}${lNameFirstChar ?? ''}`,
     };
 }

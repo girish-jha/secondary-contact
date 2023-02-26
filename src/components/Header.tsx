@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
+import { ChangeEvent, useState } from 'react';
+import { Clear, Delete } from '@mui/icons-material';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -51,7 +53,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-export function Header() {
+export function Header({ setSearchKey, searchKey }: {
+    setSearchKey: React.Dispatch<React.SetStateAction<string>>,
+    searchKey: string
+}) {
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => setSearchKey(event.target.value);
+    const clearSearchKey = () => setSearchKey('')
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
@@ -65,22 +74,16 @@ export function Header() {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="div"
-                        sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
-                    >
-                        MUI
-                    </Typography>
                     <Search>
                         <SearchIconWrapper>
                             <SearchIcon />
                         </SearchIconWrapper>
-                        <StyledInputBase
+                        <StyledInputBase value={searchKey}
+                            onChange={handleChange}
                             placeholder="Search…"
                             inputProps={{ 'aria-label': 'search' }}
                         />
+                        <IconButton onClick={clearSearchKey}><Clear color='primary' /> </IconButton>
                     </Search>
                 </Toolbar>
             </AppBar>
