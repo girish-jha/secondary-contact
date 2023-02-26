@@ -7,7 +7,7 @@
 // code you'd like.
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
-import { clientsClaim } from 'workbox-core';
+import { clientsClaim, RouteMatchCallbackOptions } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
@@ -77,8 +77,8 @@ self.addEventListener('message', (event) => {
   }
 });
 
-const CACHE_NAME = "offline";
-const OFFLINE_URL = "/index.html"
+// const CACHE_NAME = "offline";
+// const OFFLINE_URL = "/index.html"
 
 // self.addEventListener("install", (event) => {
 //   event.waitUntil(
@@ -109,9 +109,9 @@ const OFFLINE_URL = "/index.html"
 //   )
 // })
 
-registerRoute(({ request }) => { request.destination == 'script' }, new NetworkFirst())
-registerRoute(({ request }) => { request.destination == 'font' }, new NetworkFirst())
-registerRoute(({ request }) => { request.destination == 'document' }, new NetworkFirst())
-registerRoute(({ request }) => { request.destination == 'style' }, new NetworkFirst())
+// const routeMatchArr: RequestDestination[] = ['font', 'document', 'style', 'script', 'manifest', ''];
+// const networkFirstRoutes = ({ request }: RouteMatchCallbackOptions) => routeMatchArr.includes(request.destination)
+
+// registerRoute(networkFirstRoutes, new NetworkFirst())
 
 // Any other custom service worker logic can go here.
