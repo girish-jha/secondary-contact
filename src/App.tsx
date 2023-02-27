@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, HashRouter } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Edit } from './pages/Edit';
 import { Details } from './pages/Details';
@@ -38,7 +38,7 @@ function App() {
               overflowY: "scroll",
             }}
           >
-            <BrowserRouter>
+            <HashRouter>
               <Routes>
                 <Route element={<Home searchKey={searchKey} />} path="/" />
                 <Route element={<Home searchKey={searchKey} />} path="/:showFavorite" />
@@ -46,7 +46,7 @@ function App() {
                 <Route element={<Details />} path="/details/:id?" />
               </Routes>
               <Footer />
-            </BrowserRouter>
+            </HashRouter>
           </Box>
 
         </Container>
