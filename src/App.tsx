@@ -8,7 +8,7 @@ import { contacts } from './db';
 // import { Index } from './pages/Index';
 import { BottomNavigation, BottomNavigationAction, Box, Container, SpeedDial, SpeedDialIcon } from '@mui/material';
 import { Restore, Favorite, LocationOn, ContactPhoneSharp, Add } from '@mui/icons-material'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
@@ -27,6 +27,7 @@ function App() {
     <div className="App">
       <ThemeProvider theme={lightTheme}>
         <Header searchKey={searchKey} setSearchKey={setSearchKey} />
+        {/* <Updater /> */}
         <Container maxWidth="sm" sx={{ paddingTop: "2rem" }} >
           <Box
             sx={{
@@ -45,6 +46,7 @@ function App() {
                 <Route element={<Edit />} path="/edit/:id?" />
                 <Route element={<Details />} path="/details/:id?" />
               </Routes>
+
               <Footer />
             </HashRouter>
           </Box>

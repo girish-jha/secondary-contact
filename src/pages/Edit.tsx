@@ -19,7 +19,7 @@ export const Edit = (props: EditProps) => {
         name: { test: "required", message: "Name is required" },
         jobTitle: {},
         email: { test: ["email"], message: "Enter valid email" },
-        phones: { test: /(^((0)|\+91)?[1-9][0-9]{9}$)|(^$)/, message: "Enter valid phone" },
+        phones: { test: /(^[1-9][0-9]{9}$)|(^$)/, message: "Enter valid phone, enter 10 digit mobile/telephone number" },
         notes: {},
     });
 
@@ -35,9 +35,10 @@ export const Edit = (props: EditProps) => {
             name: values.name as string,
             email: values.email as string,
             jobTitle: values.jobTitle as string,
-            phones: values.phones as string,
+            phones: `+91${values.phones}` as string,
             notes: values.notes as string
         };
+
         if (id && currentContact) {
             await contacts.update(currentContact, { ...contactItem })
         }
@@ -47,7 +48,6 @@ export const Edit = (props: EditProps) => {
         navigate("/")
 
     }
-
     useEffect(() => {
         if (id)
             contacts.get(Number(id)).then(res => {
@@ -58,16 +58,19 @@ export const Edit = (props: EditProps) => {
                         email: res.email ?? '',
                         jobTitle: res.jobTitle ?? '',
                         notes: res.notes ?? '',
-                        phones: res.phones ?? ''
+                        phones: (res.phones ? res.phones.substring(3) : '') ?? ''
                     })
                 }
             })
     }, [id])
+
+
+
     return (
         <Stack spacing={2}>
             <TextField {...fields.name} placeholder="Contact Name" fullWidth type="text" />
             <TextField {...fields.jobTitle} placeholder="Job Title" fullWidth type="text" />
-            <TextField {...fields.phones} placeholder="Phone" fullWidth type="tel" />
+            <TextField {...fields.phones} placeholder="Phone" fullWidth type="tel" inputProps={{ maxLength: 10 }} />
             <TextField {...fields.email} placeholder="Email" fullWidth type="email" />
             <TextField {...fields.notes} placeholder="Notes" multiline rows={4} fullWidth type="text" />
             <Button onClick={onSubmit}>Save</Button>

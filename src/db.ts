@@ -11,14 +11,12 @@ export interface TContact {
 }
 
 export class ContactsDb extends Dexie {
-    // 'friends' is added by dexie when declaring the stores()
-    // We just tell the typing system this is the case
     contacts!: Table<TContact>;
 
     constructor() {
         super('ContactDb');
-        this.version(1).stores({
-            contacts: '++id, name,jobTitle,isFavorite, phones, email, notes' // Primary key and indexed props
+        this.version(2).stores({
+            contacts: '++id, name,jobTitle,isFavorite, phones, email, notes'
         });
     }
 }

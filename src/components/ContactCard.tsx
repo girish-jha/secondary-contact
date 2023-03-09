@@ -26,7 +26,7 @@ export const ContactCard = (props: ContactCardProps) => {
         const vcard = new VCard();
         vcard.addName(name)
             .addJobtitle(jobTitle ?? '')
-            .addPhoneNumber(phones ?? '', 'HOME')
+            .addPhoneNumber(`${phones}` ?? '', 'HOME')
             .addEmail(email ?? '', 'HOME')
             .addNote(notes ?? '');
 
