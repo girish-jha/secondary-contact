@@ -2,7 +2,7 @@ import { ContactList } from "../components/ContactList"
 import { v4 as uuidv4 } from 'uuid';
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { contacts } from '../db';
+import { contacts, TContact } from '../db';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SpeedDial, SpeedDialIcon } from "@mui/material";
 
@@ -31,7 +31,7 @@ export const Home = (props: HomeProps) => {
 
     const onSearch = (value: string | undefined) => {
         if (value) {
-            const result = allItems?.filter(c => containsIgnoreCase(`${c.name}ø${c.jobTitle}ø${c.email}ø${c.phones}ø${c.notes}`, value));
+            const result = allItems?.filter(c => IsValidInSearch(c, value));
             setContactList(result)
         }
         else setContactList(allItems)
@@ -52,3 +52,15 @@ export const Home = (props: HomeProps) => {
 }
 
 const containsIgnoreCase = (original: string, other: string) => original.toLowerCase().includes(other.toLowerCase())
+
+
+function IsValidInSearch(c: TContact, value: string): boolean {
+    const names = c.name.split(' ');
+    const jobTitles = c.jobTitle.split(' ') ?? []
+    const email = c.email ?? ''
+    const phone = c.phones?.substring(3) ?? ''
+    const notes = c.notes?.split(' ') ?? []
+
+    return [...names, ...jobTitles, email, phone, ...notes].some(s => s.toLowerCase().startsWith(value.toLowerCase()))
+}
+

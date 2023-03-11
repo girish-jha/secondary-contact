@@ -4,11 +4,14 @@ import { contacts, TContact } from "../db";
 import { Phone, Email, Edit, Delete, Note, Favorite, Share, WhatsApp } from '@mui/icons-material';
 import { red } from '@mui/material/colors';
 import VCard from 'vcard-creator'
+import Browser from 'bowser';
 
 type ContactCardProps = {
     contact: TContact
 }
 
+const browser = Browser.parse(window.navigator.userAgent)
+const isAndroid = browser.os.name == 'Android'
 
 
 export const ContactCard = (props: ContactCardProps) => {
@@ -17,7 +20,7 @@ export const ContactCard = (props: ContactCardProps) => {
     const setFavorite = async () => {
         await contacts.update(props.contact, { isFavorite: !isFavorite })
     }
-
+    console.log(browser)
     const shareContact = () => {
         if (!navigator.canShare) {
             console.log(`Your browser doesn't support the Web Share API.`)
@@ -29,27 +32,32 @@ export const ContactCard = (props: ContactCardProps) => {
             .addPhoneNumber(`${phones}` ?? '', 'HOME')
             .addEmail(email ?? '', 'HOME')
             .addNote(notes ?? '');
+        const contactText = `name: ${name}\nphone: ${phones}\nemail: ${email}`
 
-        const data = {
+        const data = !isAndroid ? {
             files: [
-                new File([vcard.toString()], 'image.vcf', {
+                new File([vcard.toString()], `${name}.vcf`, {
                     type: 'vcard',
                 }),
             ],
             title: name,
             text: vcard.toString(),
+        } : {
+            title: name,
+            text: contactText,
         };
         console.log(vcard.toString(), navigator.share)
-        if (navigator.share) {
+        if (navigator.share && navigator.canShare(data)) {
             navigator
                 .share(data)
                 .then(() => {
                     console.log('Successfully shared');
                 })
                 .catch(error => {
-                    console.error('Something went wrong sharing the blog', error);
+                    console.error('Something went wrong sharing the contact', error);
                 });
         }
+        else console.error('You cannot share');
     };
     const editContact = () => {
         navigate(`/edit/${id}`)
