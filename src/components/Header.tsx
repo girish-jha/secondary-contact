@@ -66,7 +66,7 @@ export function Header({ setSearchKey, searchKey }: {
             <AppBar position="static">
                 <Toolbar>
                     <IconButton
-                        size="large"
+                        size="medium"
                         edge="start"
                         color="inherit"
                         aria-label="open drawer"
@@ -83,7 +83,10 @@ export function Header({ setSearchKey, searchKey }: {
                             placeholder="Search…"
                             inputProps={{ 'aria-label': 'search' }}
                         />
-                        <IconButton onClick={clearSearchKey}><Clear color='primary' /> </IconButton>
+                        <IconButton style={{ float: 'right' }} onClick={clearSearchKey}>
+                            <Clear color='primary' />
+                        </IconButton>
+
                     </Search>
                 </Toolbar>
             </AppBar>
